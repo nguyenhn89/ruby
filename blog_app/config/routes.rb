@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
+  devise_for :users
+  root "products#index"
   get "up" => "rails/health#show", as: :rails_health_check
 
   resources :products
+  resources :categories
 
   # get    "/products",          to: "products#index",   as: :products        # danh sách
   # get    "/products/new",      to: "products#new",     as: :new_product     # form tạo mới

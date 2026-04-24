@@ -1,0 +1,56 @@
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Danh mục</h1>
+  <% if current_user&.admin? %>
+    <%= link_to "Thêm danh mục", new_category_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+  <% end %>
+</div>
+
+<% if notice %>
+  <div class="bg-green-100 text-green-800 px-4 py-3 rounded mb-4"><%= notice %></div>
+<% end %>
+
+<%= form_with url: categories_path, method: :get, class: "mb-4 flex gap-2" do %>
+  <%= text_field_tag :q, params[:q], placeholder: "Tìm kiếm danh mục...",
+      class: "flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+  <%= submit_tag "Tìm", class: "bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 cursor-pointer" %>
+  <% if params[:q].present? %>
+    <%= link_to "Xóa", categories_path, class: "px-4 py-2 rounded-lg text-sm border border-gray-300 text-gray-600 hover:bg-gray-50" %>
+  <% end %>
+<% end %>
+
+<div class="bg-white rounded shadow overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+      <tr>
+        <th class="px-6 py-3 text-left">Tên danh mục</th>
+        <th class="px-6 py-3 text-left">Số sản phẩm</th>
+        <th class="px-6 py-3 text-left">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% @categories.each do |category| %>
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 font-medium text-gray-800"><%= category.name %></td>
+          <td class="px-6 py-4 text-gray-600"><%= category.products.count %></td>
+          <td class="px-6 py-4 flex gap-2">
+            <% if current_user&.admin? %>
+              <%= link_to "Sửa", edit_category_path(category), class: "text-yellow-600 hover:underline" %>
+              <%= link_to "Xóa", category_path(category), data: { turbo_method: :delete, turbo_confirm: "Bạn chắc chắn?" }, class: "text-red-600 hover:underline" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-4 flex justify-center gap-1 text-sm">
+  <%= link_to_unless_current "«", categories_path(page: @categories.current_page - 1, q: params[:q]),
+      class: "px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 #{'opacity-50 pointer-events-none' if @categories.first_page?}" %>
+  <% (@categories.total_pages).times do |i| %>
+    <%= link_to i + 1, categories_path(page: i + 1, q: params[:q]),
+        class: "px-3 py-1 rounded border #{ @categories.current_page == i + 1 ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }" %>
+  <% end %>
+  <%= link_to_unless_current "»", categories_path(page: @categories.current_page + 1, q: params[:q]),
+      class: "px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 #{'opacity-50 pointer-events-none' if @categories.last_page?}" %>
+</div>

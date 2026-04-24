@@ -1,37 +1,90 @@
 <div class="flex justify-between items-center mb-6">
   <h1 class="text-2xl font-bold text-gray-800">Danh sách sản phẩm</h1>
-  <%= link_to "Thêm sản phẩm", new_product_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+  <% if current_user&.admin? %>
+    <%= link_to "Thêm sản phẩm", new_product_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+  <% end %>
 </div>
 
 <% if notice %>
   <div class="bg-green-100 text-green-800 px-4 py-3 rounded mb-4"><%= notice %></div>
 <% end %>
 
-<div class="bg-white rounded shadow overflow-hidden">
-  <table class="w-full text-sm">
-    <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-      <tr>
-        <th class="px-6 py-3 text-left">Tên</th>
-        <th class="px-6 py-3 text-left">Mô tả</th>
-        <th class="px-6 py-3 text-left">Giá</th>
-        <th class="px-6 py-3 text-left">Tồn kho</th>
-        <th class="px-6 py-3 text-left">Hành động</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      <% @products.each do |product| %>
-        <tr class="hover:bg-gray-50">
-          <td class="px-6 py-4 font-medium text-gray-800"><%= product.name %></td>
-          <td class="px-6 py-4 text-gray-600"><%= product.description %></td>
-          <td class="px-6 py-4 text-gray-800"><%= number_to_currency(product.price, unit: "₫", separator: ",", delimiter: ".", format: "%n %u") %></td>
-          <td class="px-6 py-4 text-gray-800"><%= product.stock %></td>
-          <td class="px-6 py-4 flex gap-2">
-            <%= link_to "Xem", product_path(product), class: "text-blue-600 hover:underline" %>
-            <%= link_to "Sửa", edit_product_path(product), class: "text-yellow-600 hover:underline" %>
-            <%= link_to "Xóa", product_path(product), data: { turbo_method: :delete, turbo_confirm: "Bạn chắc chắn?" }, class: "text-red-600 hover:underline" %>
-          </td>
+<%= form_with url: products_path, method: :get, class: "mb-4 flex gap-2" do %>
+  <%= text_field_tag :q, params[:q], placeholder: "Tìm kiếm sản phẩm...",
+      class: "flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" %>
+  <%= submit_tag "Tìm", class: "bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 cursor-pointer" %>
+  <% if params[:q].present? %>
+    <%= link_to "Xóa", products_path, class: "px-4 py-2 rounded-lg text-sm border border-gray-300 text-gray-600 hover:bg-gray-50" %>
+  <% end %>
+<% end %>
+
+<div>
+  <div class="bg-white rounded shadow overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+        <tr>
+          <th class="px-6 py-3 text-left w-16">Ảnh</th>
+          <th class="px-6 py-3 text-left w-40">Tên</th>
+          <th class="px-6 py-3 text-left">Mô tả</th>
+          <th class="px-6 py-3 text-left w-36">Giá</th>
+          <th class="px-6 py-3 text-left w-24">Tồn kho</th>
+          <th class="px-6 py-3 text-left w-36">Hành động</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @products.each do |product| %>
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2 w-14">
+              <% if product.image.attached? %>
+                <div class="h-10 w-10 rounded overflow-hidden shrink-0">
+                  <%= image_tag product.image, class: "h-full w-full object-cover" %>
+                </div>
+              <% else %>
+                <div class="h-10 w-10 rounded bg-gray-100 flex items-center justify-center shrink-0">
+                  <span class="material-icons text-gray-300" style="font-size:20px">image</span>
+                </div>
+              <% end %>
+            </td>
+            <td class="px-6 py-2 font-medium text-gray-800"><%= product.name %></td>
+            <td class="px-6 py-2 text-gray-600"><%= product.description %></td>
+            <td class="px-6 py-2 text-gray-800 whitespace-nowrap"><%= number_to_currency(product.price, unit: "₫", separator: ",", delimiter: ".", format: "%n %u") %></td>
+            <td class="px-6 py-2 text-gray-800"><%= product.stock %></td>
+            <td class="px-6 py-2">
+              <div class="flex items-center gap-3">
+                <%= link_to product_path(product), title: "Xem", class: "px-2 py-1.5 rounded hover:bg-blue-50 transition-colors" do %>
+                  <span class="material-icons" style="font-size:18px; color:#3b82f6">visibility</span>
+                <% end %>
+                <% if current_user&.admin? %>
+                  <%= link_to edit_product_path(product), title: "Sửa", class: "px-2 py-1.5 rounded hover:bg-yellow-50 transition-colors" do %>
+                    <span class="material-icons" style="font-size:18px; color:#eab308">edit</span>
+                  <% end %>
+                  <%= link_to product_path(product), data: { turbo_method: :delete, turbo_confirm: "Bạn chắc chắn muốn xóa?" }, title: "Xóa", class: "px-2 py-1.5 rounded hover:bg-red-50 transition-colors" do %>
+                    <span class="material-icons" style="font-size:18px; color:#ef4444">delete</span>
+                  <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="mt-4 mb-4 pt-3 flex items-center justify-between">
+  <span class="text-xs text-gray-400">Trang <%= @products.current_page %>/<%= @products.total_pages %> &nbsp;·&nbsp; <%= @products.total_count %> sản phẩm</span>
+  <div class="flex items-center gap-1">
+    <%= link_to products_path(page: @products.current_page - 1, q: params[:q]),
+        class: "h-9 px-3 flex items-center justify-center rounded border border-gray-300 text-base text-gray-500 hover:bg-gray-100 select-none #{@products.first_page? ? 'opacity-30 pointer-events-none' : ''}" do %>
+      &lsaquo;
+    <% end %>
+    <% @products.total_pages.times do |i| %>
+      <%= link_to i + 1, products_path(page: i + 1, q: params[:q]),
+          class: "h-9 min-w-9 px-3 flex items-center justify-center rounded border text-sm font-medium #{ @products.current_page == i + 1 ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-100' }" %>
+    <% end %>
+    <%= link_to products_path(page: @products.current_page + 1, q: params[:q]),
+        class: "h-9 px-3 flex items-center justify-center rounded border border-gray-300 text-base text-gray-500 hover:bg-gray-100 select-none #{@products.last_page? ? 'opacity-30 pointer-events-none' : ''}" do %>
+      &rsaquo;
+    <% end %>
+  </div>
 </div>

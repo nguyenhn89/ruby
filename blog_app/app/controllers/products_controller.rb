@@ -1,8 +1,12 @@
 class ProductsController < ApplicationController
+  before_action :authenticate_user!, only: %i[new create edit update destroy]
+  before_action :require_admin!, only: %i[new create edit update destroy]
   before_action :set_product, only: %i[show edit update destroy]
 
   def index
     @products = Product.all
+    @products = @products.where("name LIKE ? OR description LIKE ?", "%#{params[:q]}%", "%#{params[:q]}%") if params[:q].present?
+    @products = @products.page(params[:page]).per(10)
   end
 
   def show
@@ -44,6 +48,6 @@ class ProductsController < ApplicationController
   end
 
   def product_params
-    params.require(:product).permit(:name, :description, :price, :stock)
+    params.require(:product).permit(:name, :description, :price, :stock, :category_id, :image)
   end
 end
