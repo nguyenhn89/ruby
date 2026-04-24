@@ -1,0 +1,37 @@
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Danh sách sản phẩm</h1>
+  <%= link_to "Thêm sản phẩm", new_product_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+</div>
+
+<% if notice %>
+  <div class="bg-green-100 text-green-800 px-4 py-3 rounded mb-4"><%= notice %></div>
+<% end %>
+
+<div class="bg-white rounded shadow overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+      <tr>
+        <th class="px-6 py-3 text-left">Tên</th>
+        <th class="px-6 py-3 text-left">Mô tả</th>
+        <th class="px-6 py-3 text-left">Giá</th>
+        <th class="px-6 py-3 text-left">Tồn kho</th>
+        <th class="px-6 py-3 text-left">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% @products.each do |product| %>
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 font-medium text-gray-800"><%= product.name %></td>
+          <td class="px-6 py-4 text-gray-600"><%= product.description %></td>
+          <td class="px-6 py-4 text-gray-800"><%= number_to_currency(product.price, unit: "₫", separator: ",", delimiter: ".", format: "%n %u") %></td>
+          <td class="px-6 py-4 text-gray-800"><%= product.stock %></td>
+          <td class="px-6 py-4 flex gap-2">
+            <%= link_to "Xem", product_path(product), class: "text-blue-600 hover:underline" %>
+            <%= link_to "Sửa", edit_product_path(product), class: "text-yellow-600 hover:underline" %>
+            <%= link_to "Xóa", product_path(product), data: { turbo_method: :delete, turbo_confirm: "Bạn chắc chắn?" }, class: "text-red-600 hover:underline" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
